@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#5b3fc4">
+<meta name="description" content="Quick SMS — Simple, Fast & Secure Messaging">
+<title>Quick SMS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f0f2f5;min-height:100vh;color:#1a1a1a;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* Splash */
+#splashScreen{background:linear-gradient(135deg,#2b1b6b 0%,#5b3fc4 50%,#7b5cff 100%);align-items:center;justify-content:center;position:fixed;inset:0;z-index:9999}
+.splash-logo{width:110px;height:110px;background:#fff;border-radius:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:splashIn .8s ease}
+.splash-title{color:#fff;font-size:32px;font-weight:800;margin-top:24px;animation:splashIn .8s ease .15s both}
+.splash-sub{color:rgba(255,255,255,.8);font-size:14px;margin-top:8px;animation:splashIn .8s ease .3s both}
+.splash-loader{width:40px;height:4px;background:rgba(255,255,255,.3);border-radius:4px;margin-top:40px;overflow:hidden;animation:splashIn .8s ease .4s both}
+.splash-loader-bar{height:100%;width:30%;background:#fff;border-radius:4px;animation:loadingBar 1.2s ease-in-out infinite}
+@keyframes splashIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes loadingBar{0%{transform:translateX(-100%)}50%{transform:translateX(200%)}100%{transform:translateX(400%)}}
+
+/* Offline */
+#offlineBanner{display:none;background:#e74c3c;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:600;position:fixed;top:0;left:0;right:0;z-index:9998}
+
+/* Auth */
+.auth-container{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;background:linear-gradient(180deg,#f8f6ff 0%,#f0f2f5 100%)}
+.auth-card{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.auth-logo{width:70px;height:70px;background:linear-gradient(135deg,#5b3fc4,#7b5cff);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:#fff}
+.auth-title{text-align:center;font-size:22px;font-weight:700;margin-bottom:6px}
+.auth-sub{text-align:center;font-size:13px;color:#888;margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:6px}
+.form-group input{width:100%;padding:14px 16px;border:1.5px solid #e8e8e8;border-radius:12px;font-size:15px;outline:none;background:#fafafa;transition:border-color .2s,background .2s}
+.form-group input:focus{border-color:#5b3fc4;background:#fff}
+.auth-btn{width:100%;padding:15px;background:linear-gradient(135deg,#5b3fc4,#7b5cff);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:600;margin-top:8px;box-shadow:0 6px 20px rgba(91,63,196,.3);cursor:pointer}
+.auth-btn:disabled{opacity:.7;cursor:not-allowed}
+.auth-switch{text-align:center;margin-top:18px;font-size:14px;color:#666}
+.auth-switch span{color:#5b3fc4;font-weight:600;cursor:pointer}
+.auth-error{text-align:center;color:#e74c3c;font-size:13px;margin-top:12px;min-height:20px}
+.auth-success{text-align:center;color:#00a86b;font-size:13px;margin-top:12px}
+.pending-box{background:#fff8e6;border:1.5px solid #ffe0a3;border-radius:14px;padding:16px;margin-top:16px;text-align:center}
+.pending-box h3{color:#b8860b;font-size:16px;margin-bottom:8px}
+.pending-box p{color:#856404;font-size:13px;line-height:1.5}
+
+/* Home Header */
+.status-bar{height:44px;background:linear-gradient(135deg,#2b1b6b,#4a2c9a)}
+.header{background:linear-gradient(135deg,#2b1b6b 0%,#5b3fc4 50%,#7b5cff 100%);padding:16px 20px 55px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 60%);pointer-events:none}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;position:relative;z-index:2}
+.menu-btn,.profile-btn,.notif-btn{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#fff;border:none;font-size:18px;font-weight:700;position:relative;cursor:pointer}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:#e74c3c;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px}
+.logo-circle{width:76px;height:76px;background:#fff;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(0,0,0,.2)}
+.app-name{color:#fff;font-size:26px;font-weight:700;margin-bottom:4px}
+.tagline{color:rgba(255,255,255,.85);font-size:13px;letter-spacing:1px}
+
+/* Main */
+.main{flex:1;padding:0 16px 30px;margin-top:-36px;position:relative;z-index:5}
+.search-card{background:#fff;border-radius:24px;padding:28px 22px;box-shadow:0 10px 40px rgba(0,0,0,.08);margin-bottom:20px}
+.search-icon-wrap{width:64px;height:64px;background:linear-gradient(135deg,#eef0ff,#f5f0ff);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.search-title{text-align:center;font-size:20px;font-weight:700;margin-bottom:6px}
+.search-subtitle{text-align:center;font-size:13px;color:#888;margin-bottom:24px}
+.input-wrap{position:relative;margin-bottom:18px}
+.input-wrap svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:#999}
+.input-wrap input{width:100%;padding:16px 16px 16px 48px;border:1.5px solid #e8e8e8;border-radius:14px;font-size:15px;outline:none;background:#fafafa;transition:border-color .2s,box-shadow .2s}
+.input-wrap input:focus{border-color:#5b3fc4;background:#fff;box-shadow:0 0 0 4px rgba(91,63,196,.1)}
+.search-btn{width:100%;padding:16px;background:linear-gradient(135deg,#5b3fc4,#7b5cff);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(91,63,196,.35)}
+.search-btn:disabled{opacity:.7;cursor:not-allowed}
+#status{text-align:center;margin-top:16px;font-size:14px;min-height:22px;font-weight:500}
+.error{color:#e74c3c}
+
+.home-profile-card{background:#fff;border-radius:20px;padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);cursor:pointer}
+.home-profile-avatar{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#5b3fc4,#7b5cff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700}
+.home-profile-info{flex:1}
+.home-profile-info .name{font-weight:600;font-size:15px}
+.home-profile-info .sub{font-size:12px;color:#888;margin-top:2px}
+.home-profile-arrow{color:#bbb;font-size:20px}
+
+.menu-buttons{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.menu-action-btn{width:100%;padding:16px;background:#fff;border:none;border-radius:16px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 15px rgba(0,0,0,.06);cursor:pointer}
+.menu-action-btn .icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.menu-action-btn .badge{background:#efeaff;color:#5b3fc4;padding:4px 10px;border-radius:20px;font-size:13px}
+
+/* Waiting */
+.waiting-container{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center;background:linear-gradient(180deg,#f8f6ff 0%,#f0f2f5 100%)}
+.waiting-icon{width:100px;height:100px;background:linear-gradient(135deg,#5b3fc4,#7b5cff);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 12px 30px rgba(91,63,196,.3);animation:pulse 2s infinite}
+.waiting-icon.accepted{background:linear-gradient(135deg,#00a86b,#00c853);animation:none}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.waiting-title{font-size:22px;font-weight:700;margin-bottom:10px}
+.waiting-subtitle{font-size:15px;color:#666;margin-bottom:8px;line-height:1.5}
+.waiting-id{background:#efeaff;color:#5b3fc4;padding:8px 18px;border-radius:30px;font-weight:600;font-size:15px;margin:16px 0 20px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;margin-bottom:24px}
+.status-badge.pending{background:#fff3cd;color:#856404}
+.status-badge.accepted{background:#d4edda;color:#155724}
+.status-badge.checking{background:#e8eaf6;color:#5b3fc4}
+.back-home-btn{background:transparent;border:none;color:#5b3fc4;font-size:14px;font-weight:500;cursor:pointer;padding:10px;margin-top:10px}
+
+/* Chat */
+.chat-header{background:linear-gradient(135deg,#5b3fc4,#7b5cff);padding:12px 16px;display:flex;align-items:center;gap:12px;color:#fff;position:sticky;top:0;z-index:50}
+.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px}
+.chat-profile{display:flex;align-items:center;gap:10px;flex:1}
+.chat-avatar{width:42px;height:42px;border-radius:50%;background:#ddd;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
+.chat-name{font-size:16px;font-weight:600}
+.chat-status{font-size:12px;opacity:.9}
+.chat-actions{display:flex;gap:16px}
+.chat-actions button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+.chat-messages{flex:1;padding:16px;overflow-y:auto;background:#f0f2f5;display:flex;flex-direction:column;gap:10px}
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;font-size:14px;text-align:center;padding:40px 20px}
+.empty-chat svg{margin-bottom:12px;opacity:.5}
+.message{max-width:78%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.4;word-wrap:break-word}
+.message.received{background:#fff;align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.message.sent{background:#5b3fc4;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.message-time{font-size:11px;opacity:.7;margin-top:4px;text-align:right}
+.message.received .message-time{color:#888}
+.chat-input-area{background:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px;border-top:1px solid #eee;position:sticky;bottom:0}
+.chat-input-area .plus-btn,.chat-input-area .emoji-btn,.chat-input-area .send-btn{width:40px;height:40px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.plus-btn{background:#5b3fc4;color:#fff;font-size:22px}
+.emoji-btn{background:transparent;font-size:22px}
+.send-btn{background:#5b3fc4;color:#fff}
+.send-btn:disabled{opacity:.5}
+.chat-input-area input{flex:1;padding:12px 16px;border:none;background:#f0f2f5;border-radius:24px;font-size:15px;outline:none}
+
+/* Profile & Notif */
+.profile-header,.notif-header{background:linear-gradient(135deg,#5b3fc4,#7b5cff);padding:16px;display:flex;align-items:center;gap:12px;color:#fff}
+.profile-header .title,.notif-header .title{font-size:18px;font-weight:600;flex:1}
+.profile-body,.notif-body{flex:1;padding:24px 20px;overflow-y:auto}
+.profile-id-box{background:#efeaff;color:#5b3fc4;padding:12px 16px;border-radius:14px;text-align:center;font-weight:700;font-size:18px;letter-spacing:2px;margin-bottom:24px}
+.logout-btn{width:100%;padding:14px;background:#fff0f0;color:#e74c3c;border:1.5px solid #ffcdd2;border-radius:14px;font-size:15px;font-weight:600;margin-top:20px;cursor:pointer}
+.notif-item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);border-left:4px solid #5b3fc4}
+.notif-item.read{opacity:.7;border-left-color:#ccc}
+.notif-item .msg{font-size:14px;line-height:1.45;margin-bottom:6px}
+.notif-item .time{font-size:11px;color:#888}
+.empty-notif{text-align:center;color:#999;padding:40px 20px;font-size:14px}
+
+/* Force Update */
+#forceUpdateScreen{display:none;position:fixed;inset:0;z-index:10000;background:linear-gradient(160deg,#1a0f4a 0%,#2b1b6b 40%,#5b3fc4 100%);flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;color:#fff}
+#forceUpdateScreen.active{display:flex}
+.fu-icon{width:96px;height:96px;background:rgba(255,255,255,.15);border-radius:28px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 12px 40px rgba(0,0,0,.25);animation:fuPulse 2.2s ease-in-out infinite}
+@keyframes fuPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.fu-title{font-size:26px;font-weight:800;margin-bottom:10px}
+.fu-subtitle{font-size:15px;opacity:.9;line-height:1.55;max-width:320px;margin-bottom:22px}
+.fu-version-box{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 22px;margin-bottom:22px;font-size:14px}
+.fu-version-box .old{opacity:.75;text-decoration:line-through;margin-right:8px}
+.fu-version-box .new{font-weight:700;color:#a5f3c4}
+.fu-changelog{background:rgba(0,0,0,.2);border-radius:16px;padding:16px 20px;margin-bottom:28px;text-align:left;max-width:340px;width:100%}
+.fu-changelog h4{font-size:13px;opacity:.8;margin-bottom:10px;font-weight:600}
+.fu-changelog ul{list-style:none;padding:0;margin:0}
+.fu-changelog li{font-size:13px;padding:5px 0;padding-left:18px;position:relative;line-height:1.4;opacity:.95}
+.fu-changelog li::before{content:"✓";position:absolute;left:0;color:#7dfea4;font-weight:700}
+.fu-btn{width:100%;max-width:320px;padding:17px 24px;background:#fff;color:#5b3fc4;border:none;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;gap:10px}
+.fu-btn:active{transform:scale(.97)}
+.fu-btn:disabled{opacity:.65;cursor:not-allowed}
+.fu-btn .spinner{width:20px;height:20px;border:2.5px solid rgba(91,63,196,.3);border-top-color:#5b3fc4;border-radius:50%;animation:fuSpin .7s linear infinite;display:none}
+.fu-btn.loading .spinner{display:block}
+.fu-btn.loading .btn-text{display:none}
+@keyframes fuSpin{to{transform:rotate(360deg)}}
+.fu-note{font-size:12px;opacity:.65;margin-top:18px;max-width:300px;line-height:1.45}
+.fu-error{color:#ffb4b4;font-size:13px;margin-top:12px;min-height:20px}
+</style>
+</head>
+<body>
+<div id="offlineBanner">⚠️ ইন্টারনেট সংযোগ নেই</div>
+
+<!-- Force Update -->
+<div id="forceUpdateScreen">
+  <div class="fu-icon">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  </div>
+  <div class="fu-title">আপডেট আছে!</div>
+  <div class="fu-subtitle" id="fuMessage">নতুন ভার্সন এসেছে। আপডেট করুন।</div>
+  <div class="fu-version-box">
+    <span class="old" id="fuOldVersion">v1.0.0</span>
+    <span>→</span>
+    <span class="new" id="fuNewVersion">v1.0.1</span>
+  </div>
+  <div class="fu-changelog" id="fuChangelog" style="display:none">
+    <h4>নতুন কী আছে</h4>
+    <ul id="fuChangelogList"></ul>
+  </div>
+  <button class="fu-btn" id="fuUpdateBtn" onclick="startForceUpdate()">
+    <span class="spinner"></span>
+    <span class="btn-text">Update নাও</span>
+  </button>
+  <div class="fu-error" id="fuError"></div>
+  <div class="fu-note">আপডেট না করলে অ্যাপ ব্যবহার করা যাবে না। ডাউনলোড শেষে “ইনস্টল” চাপুন।</div>
+</div>
+
+<!-- Splash -->
+<div id="splashScreen" class="screen active">
+  <div class="splash-logo">
+    <svg width="54" height="54" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="#5b3fc4"/><circle cx="9" cy="10" r="1.3" fill="white"/><circle cx="12.5" cy="10" r="1.3" fill="white"/><circle cx="16" cy="10" r="1.3" fill="white"/></svg>
+  </div>
+  <div class="splash-title">Quick SMS</div>
+  <div class="splash-sub">Simple • Fast • Secure</div>
+  <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+</div>
+
+<!-- Login -->
+<div id="loginScreen" class="screen">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="white"/></svg>
+      </div>
+      <div class="auth-title">Login</div>
+      <div class="auth-sub">তোমার অ্যাকাউন্টে প্রবেশ করো</div>
+      <div class="form-group">
+        <label>Email / Gmail</label>
+        <input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" id="loginBtn" onclick="doLogin()">Login</button>
+      <div class="auth-error" id="loginError"></div>
+      <div class="auth-switch">অ্যাকাউন্ট নেই? <span onclick="showRegister()">Registration করো</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Register -->
+<div id="registerScreen" class="screen">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="white"/></svg>
+      </div>
+      <div class="auth-title">Registration</div>
+      <div class="auth-sub">নতুন অ্যাকাউন্ট তৈরি করো</div>
+      <div class="form-group">
+        <label>নাম</label>
+        <input type="text" id="regName" placeholder="তোমার নাম" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>Email / Gmail</label>
+        <input type="email" id="regEmail" placeholder="example@gmail.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPass" placeholder="কমপক্ষে ৪ অক্ষর" autocomplete="new-password">
+      </div>
+      <button class="auth-btn" id="regBtn" onclick="doRegister()">Registration করো</button>
+      <div class="auth-error" id="regError"></div>
+      <div class="auth-success" id="regSuccess"></div>
+      <div id="regPendingBox" class="pending-box" style="display:none">
+        <h3>⏳ Approval Pending</h3>
+        <p>তোমার রেজিস্ট্রেশন অ্যাডমিনের কাছে পাঠানো হয়েছে। Accept হলে Login করতে পারবে।</p>
+      </div>
+      <div class="auth-switch">আগে থেকে অ্যাকাউন্ট আছে? <span onclick="showLogin()">Login করো</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Home / Search -->
+<div id="searchScreen" class="screen">
+  <div class="status-bar"></div>
+  <div class="header">
+    <div class="top-bar">
+      <button class="menu-btn" aria-label="Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+      <div style="display:flex;gap:10px">
+        <button class="notif-btn" onclick="openNotifications()" aria-label="Notifications">🔔<span class="notif-badge" id="notifBadge">0</span></button>
+        <button class="profile-btn" id="headerProfileBtn" onclick="openProfile()" aria-label="Profile">👤</button>
+      </div>
+    </div>
+    <div class="logo-circle">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="#5b3fc4"/><circle cx="9" cy="10" r="1.2" fill="white"/><circle cx="12.5" cy="10" r="1.2" fill="white"/><circle cx="16" cy="10" r="1.2" fill="white"/></svg>
+    </div>
+    <div class="app-name">Quick SMS</div>
+    <div class="tagline">Simple • Fast • Secure</div>
+  </div>
+  <div class="main">
+    <div class="search-card">
+      <div class="search-icon-wrap">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#5b3fc4" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="search-title">Search Your Friend</div>
+      <div class="search-subtitle">ফ্রেন্ডের ID লিখে সার্চ করো</div>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <input type="text" id="friendId" placeholder="Enter Friend ID" autocomplete="off">
+      </div>
+      <button class="search-btn" id="sendBtn" onclick="sendRequest()">
+        Search
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <div id="status"></div>
+    </div>
+
+    <div class="home-profile-card" onclick="openProfile()">
+      <div class="home-profile-avatar" id="homeProfileAvatar">👤</div>
+      <div class="home-profile-info">
+        <div class="name" id="homeProfileName">My Profile</div>
+        <div class="sub" id="homeProfileSub">প্রোফাইল দেখুন</div>
+      </div>
+      <div class="home-profile-arrow">›</div>
+    </div>
+
+    <div class="menu-buttons">
+      <button class="menu-action-btn" onclick="openFriendList()">
+        <span class="icon" style="background:linear-gradient(135deg,#5b3fc4,#7b5cff)">👥</span>
+        <span style="flex:1;text-align:left">Friend List</span>
+        <span class="badge" id="friendCountBadge">0</span>
+      </button>
+      <button class="menu-action-btn" onclick="alert('Group ফিচার শীঘ্রই আসছে!')" style="opacity:.7">
+        <span class="icon" style="background:linear-gradient(135deg,#00a86b,#00c853)">👥</span>
+        <span style="flex:1;text-align:left">Group</span>
+        <span style="color:#999;font-size:12px">Soon</span>
+      </button>
+      <button class="menu-action-btn" onclick="openSupport()">
+        <span class="icon" style="background:linear-gradient(135deg,#e67e22,#f39c12)">🆘</span>
+        <span style="flex:1;text-align:left">Support</span>
+        <span style="color:#bbb;font-size:18px">›</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Friend List -->
+<div id="friendListScreen" class="screen">
+  <div class="profile-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="title">Friend List</div>
+    <div style="width:30px"></div>
+  </div>
+  <div class="profile-body" id="friendListBody">
+    <div class="empty-notif">কোনো Friend নেই</div>
+  </div>
+</div>
+
+<!-- Support Modal -->
+<div id="supportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="font-size:18px;font-weight:700;margin-bottom:6px">🆘 Support</div>
+    <div style="font-size:13px;color:#888;margin-bottom:16px">তোমার সমস্যা লিখে পাঠাও। আমরা রিপ্লাই দেব।</div>
+    <textarea id="supportText" rows="4" placeholder="এখানে মেসেজ লিখো..." style="width:100%;padding:12px;border:1.5px solid #e8e8e8;border-radius:12px;font-size:14px;outline:none;resize:none;font-family:inherit"></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button onclick="closeSupport()" style="flex:1;padding:12px;border:1.5px solid #ddd;border-radius:12px;background:#fff;font-size:14px;font-weight:600;cursor:pointer">Cancel</button>
+      <button onclick="sendSupport()" id="supportSendBtn" style="flex:1;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#5b3fc4,#7b5cff);color:#fff;font-size:14px;font-weight:600;cursor:pointer">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Waiting -->
+<div id="waitingScreen" class="screen">
+  <div class="waiting-container">
+    <div class="waiting-icon" id="waitingIcon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </div>
+    <div class="waiting-title" id="waitingTitle">Friend Request পাঠানো হয়েছে!</div>
+    <div class="waiting-subtitle" id="waitingSubtitle">Accept হলে অটোমেটিক চ্যাটে নিয়ে যাবে।</div>
+    <div class="waiting-id" id="showFriendId">ID: ----</div>
+    <div class="status-badge checking" id="statusBadge">
+      <span id="statusText">⏳ Accept এর জন্য অপেক্ষা করছি...</span>
+    </div>
+    <button class="back-home-btn" onclick="goHome()">← হোমে ফিরে যান</button>
+  </div>
+</div>
+
+<!-- Chat -->
+<div id="chatScreen" class="screen">
+  <div class="chat-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="chat-profile">
+      <img src="https://i.pravatar.cc/150?img=12" class="chat-avatar" alt="">
+      <div>
+        <div class="chat-name" id="chatUserName">Friend</div>
+        <div class="chat-status" id="chatStatus">Online</div>
+      </div>
+    </div>
+    <div class="chat-actions">
+      <button type="button">📞</button>
+      <button type="button">⋮</button>
+    </div>
+  </div>
+  <div id="chatFriendBanner" style="background:#efeaff;color:#5b3fc4;text-align:center;padding:8px 12px;font-size:13px;font-weight:600">
+    ✅ Friend Request Accepted — এখন মেসেজ পাঠাতে পারো
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="empty-chat" id="emptyChat">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div>এখনো কোনো মেসেজ নেই</div>
+      <div style="font-size:12px;margin-top:6px">মেসেজ লিখে পাঠাও</div>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <button class="plus-btn" type="button">+</button>
+    <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+    <button class="emoji-btn" type="button">😊</button>
+    <button class="send-btn" id="sendMsgBtn" onclick="sendChatMessage()" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Profile -->
+<div id="profileScreen" class="screen">
+  <div class="profile-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="title">My Profile</div>
+    <div style="width:30px"></div>
+  </div>
+  <div class="profile-body">
+    <div class="profile-id-box" id="profileIdShow">------</div>
+    <div class="form-group">
+      <label>নাম</label>
+      <input type="text" id="profileName" readonly>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="profileEmail" readonly>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<!-- Notifications -->
+<div id="notifScreen" class="screen">
+  <div class="notif-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="title">Notifications</div>
+    <div style="width:30px"></div>
+  </div>
+  <div class="notif-body" id="notifList">
+    <div class="empty-notif">কোনো নোটিফিকেশন নেই</div>
+  </div>
+</div>
+
+<script>
+/* ========== Config ========== */
+const API_BASE = (location.protocol === 'file:' || location.protocol === 'content:')
+  ? 'http://127.0.0.1:5000'
+  : location.origin;
+
+const APP_VERSION_CODE = 1;
+const APP_VERSION_NAME = '1.0.0';
+
+/* ========== State ========== */
+let currentUser = null;
+let myId = '';
+let currentFriendId = '';
+let statusCheckInterval = null;
+let messagePollInterval = null;
+let notifPollInterval = null;
+let isAccepted = false;
+let knownMessageIds = new Set();
+let pendingUpdateInfo = null;
+let forceUpdateActive = false;
+
+/* ========== Helpers ========== */
+function escapeHtml(t) {
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
+}
+
+function showScreen(id) {
+  if (forceUpdateActive) return;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function updateOnlineStatus() {
+  const b = document.getElementById('offlineBanner');
+  if (b) b.style.display = navigator.onLine ? 'none' : 'block';
+}
+
+/* ========== Force Update ========== */
+async function checkForUpdate() {
+  try {
+    const res = await fetch(API_BASE + '/api/version?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return false;
+    const data = await res.json();
+    pendingUpdateInfo = data;
+    const serverCode = parseInt(data.versionCode, 10) || 0;
+    return serverCode > APP_VERSION_CODE;
+  } catch (e) {
+    console.warn('Version check failed:', e);
+    return false;
+  }
+}
+
+function showForceUpdateScreen(info) {
+  forceUpdateActive = true;
+  document.getElementById('fuMessage').innerText = info.message || 'নতুন ভার্সন এসেছে। আপডেট করুন।';
+  document.getElementById('fuOldVersion').innerText = 'v' + APP_VERSION_NAME;
+  document.getElementById('fuNewVersion').innerText = 'v' + (info.versionName || '?');
+
+  const list = document.getElementById('fuChangelogList');
+  const box = document.getElementById('fuChangelog');
+  if (info.changelog && info.changelog.length) {
+    list.innerHTML = info.changelog.map(item => '<li>' + escapeHtml(item) + '</li>').join('');
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+
+  document.getElementById('fuError').innerText = '';
+  document.getElementById('forceUpdateScreen').classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+}
+
+function startForceUpdate() {
+  if (!pendingUpdateInfo || !pendingUpdateInfo.apkUrl) {
+    document.getElementById('fuError').innerText = 'ডাউনলোড লিংক পাওয়া যায়নি। পরে আবার চেষ্টা করুন।';
+    return;
+  }
+  const btn = document.getElementById('fuUpdateBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  document.getElementById('fuError').innerText = '';
+
+  const link = document.createElement('a');
+  link.href = pendingUpdateInfo.apkUrl;
+  link.download = '';
+  link.target = '_blank';
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    document.getElementById('fuError').innerText = 'ডাউনলোড শুরু হয়েছে। ফাইল ম্যানেজার থেকে APK ওপেন করে ইনস্টল করুন।';
+  }, 1200);
+}
+
+/* ========== Auth ========== */
+function showLogin() {
+  document.getElementById('loginError').innerText = '';
+  showScreen('loginScreen');
+}
+
+function showRegister() {
+  document.getElementById('regError').innerText = '';
+  document.getElementById('regSuccess').innerText = '';
+  document.getElementById('regPendingBox').style.display = 'none';
+  showScreen('registerScreen');
+}
+
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('regPass').value;
+  const err = document.getElementById('regError');
+  const success = document.getElementById('regSuccess');
+  const btn = document.getElementById('regBtn');
+  const pendingBox = document.getElementById('regPendingBox');
+
+  err.innerText = '';
+  success.innerText = '';
+  pendingBox.style.display = 'none';
+
+  if (!name) { err.innerText = 'নাম লিখুন'; return; }
+  if (!email || email.indexOf('@') === -1) { err.innerText = 'সঠিক Email দিন'; return; }
+  if (pass.length < 4) { err.innerText = 'Password কমপক্ষে ৪ অক্ষর হতে হবে'; return; }
+
+  btn.disabled = true;
+  btn.innerText = 'Registration হচ্ছে...';
+
+  try {
+    const res = await fetch(API_BASE + '/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password: pass })
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      err.innerText = data.error || 'Registration ব্যর্থ';
+      btn.disabled = false;
+      btn.innerText = 'Registration করো';
+      return;
+    }
+
+    pendingBox.style.display = 'block';
+    btn.disabled = false;
+    btn.innerText = 'Registration করো';
+  } catch (e) {
+    err.innerText = 'সার্ভার কানেক্ট হয়নি। পরে আবার চেষ্টা করুন।';
+    console.error(e);
+    btn.disabled = false;
+    btn.innerText = 'Registration করো';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+
+  err.innerText = '';
+  if (!email || !pass) { err.innerText = 'Email ও Password দিন'; return; }
+
+  btn.disabled = true;
+  btn.innerText = 'Login হচ্ছে...';
+
+  try {
+    const res = await fetch(API_BASE + '/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      err.innerText = data.error || 'Login ব্যর্থ';
+      btn.disabled = false;
+      btn.innerText = 'Login';
+      return;
+    }
+
+    currentUser = {
+      name: data.user.name,
+      email: data.user.email,
+      id: data.user.id
+    };
+    myId = data.user.id;
+    localStorage.setItem('quicksms_current', JSON.stringify(currentUser));
+    btn.disabled = false;
+    btn.innerText = 'Login';
+    goToHome();
+    startNotifPolling();
+  } catch (e) {
+    err.innerText = 'সার্ভার কানেক্ট হয়নি। পরে আবার চেষ্টা করুন।';
+    console.error(e);
+    btn.disabled = false;
+    btn.innerText = 'Login';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('quicksms_current');
+  currentUser = null;
+  myId = '';
+  stopNotifPolling();
+  showScreen('loginScreen');
+}
+
+/* ========== Home / Profile ========== */
+function goToHome() {
+  loadProfileToUI();
+  showScreen('searchScreen');
+  loadNotifications();
+}
+
+function openProfile() {
+  if (!currentUser) return;
+  document.getElementById('profileIdShow').innerText = currentUser.id;
+  document.getElementById('profileName').value = currentUser.name;
+  document.getElementById('profileEmail').value = currentUser.email;
+  showScreen('profileScreen');
+}
+
+function loadProfileToUI() {
+  if (!currentUser) return;
+  document.getElementById('homeProfileName').innerText = currentUser.name;
+  document.getElementById('homeProfileSub').innerText = 'ID: ' + currentUser.id;
+  const initial = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('homeProfileAvatar').innerText = initial;
+  document.getElementById('headerProfileBtn').innerText = initial;
+}
+
+/* ========== Chat Request ========== */
+function sendRequest() {
+  if (!currentUser) { alert('আগে Login করো'); return; }
+  const friendId = document.getElementById('friendId').value.trim();
+  const statusDiv = document.getElementById('status');
+  const sendBtn = document.getElementById('sendBtn');
+
+  if (!friendId) {
+    statusDiv.innerHTML = '<span class="error">দয়া করে Friend ID লিখুন</span>';
+    return;
+  }
+
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = 'Sending...';
+  statusDiv.innerHTML = '<span style="color:#5b3fc4">⏳ Request পাঠানো হচ্ছে...</span>';
+
+  fetch(API_BASE + '/api/chat_request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from_id: currentUser.id,
+      from_name: currentUser.name,
+      to_id: friendId
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.ok) {
+      currentFriendId = friendId;
+      isAccepted = false;
+      knownMessageIds.clear();
+      document.getElementById('showFriendId').innerText = 'ID: ' + friendId;
+      document.getElementById('chatUserName').innerText = friendId;
+      resetWaitingUI();
+      showScreen('waitingScreen');
+      startStatusPolling();
+    } else {
+      statusDiv.innerHTML = '<span class="error">❌ ' + (data.error || 'পাঠানো যায়নি') + '</span>';
+    }
+  })
+  .catch(() => {
+    statusDiv.innerHTML = '<span class="error">❌ সার্ভার/নেটওয়ার্ক সমস্যা</span>';
+  })
+  .finally(() => {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = 'Search <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  });
+}
+
+function resetWaitingUI() {
+  document.getElementById('waitingIcon').classList.remove('accepted');
+  document.getElementById('waitingTitle').innerText = 'Chat Request পাঠানো হয়েছে!';
+  document.getElementById('waitingSubtitle').innerHTML = '১) Admin Accept করবে<br>২) অন্য ইউজার Accept করলে চ্যাট খুলবে';
+  document.getElementById('statusBadge').className = 'status-badge checking';
+  document.getElementById('statusText').innerText = '⏳ Admin Accept এর অপেক্ষা...';
+}
+
+function startStatusPolling() {
+  if (statusCheckInterval) clearInterval(statusCheckInterval);
+  checkStatus();
+  statusCheckInterval = setInterval(checkStatus, 2000);
+}
+
+function stopStatusPolling() {
+  if (statusCheckInterval) {
+    clearInterval(statusCheckInterval);
+    statusCheckInterval = null;
+  }
+}
+
+function checkStatus() {
+  if (!currentFriendId || isAccepted || !currentUser) return;
+  const badge = document.getElementById('statusBadge');
+  const statusText = document.getElementById('statusText');
+
+  fetch(API_BASE + '/api/chat_status/' + encodeURIComponent(currentUser.id) + '/' + encodeURIComponent(currentFriendId))
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'connected') {
+        isAccepted = true;
+        stopStatusPolling();
+        badge.className = 'status-badge accepted';
+        statusText.innerText = '✅ Connected! চ্যাটে নিয়ে যাচ্ছে...';
+        document.getElementById('waitingIcon').classList.add('accepted');
+        document.getElementById('waitingTitle').innerText = 'Chat Connected! 🎉';
+        setTimeout(openChat, 900);
+      } else if (data.status === 'awaiting_target') {
+        badge.className = 'status-badge pending';
+        statusText.innerText = '⏳ Admin Accept করেছে — অন্য ইউজারের Accept অপেক্ষা...';
+        document.getElementById('waitingSubtitle').innerHTML = 'অন্য ইউজার Accept করলে চ্যাট খুলবে';
+      } else if (data.status === 'rejected') {
+        badge.className = 'status-badge pending';
+        statusText.innerText = '❌ Request Rejected';
+        document.getElementById('waitingTitle').innerText = 'Request বাতিল হয়েছে';
+      } else {
+        badge.className = 'status-badge pending';
+        statusText.innerText = '⏳ Admin Accept এর অপেক্ষা...';
+      }
+    })
+    .catch(() => {
+      badge.className = 'status-badge checking';
+      statusText.innerText = '⚠️ সার্ভার কানেক্ট হচ্ছে না';
+    });
+}
+
+/* ========== Chat ========== */
+function openChat() {
+  document.getElementById('chatMessages').innerHTML =
+    '<div class="empty-chat" id="emptyChat">' +
+    '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+    '<div>এখনো কোনো মেসেজ নেই</div><div style="font-size:12px;margin-top:6px">মেসেজ লিখে পাঠাও</div></div>';
+  knownMessageIds.clear();
+  showScreen('chatScreen');
+  startMessagePolling();
+}
+
+function startMessagePolling() {
+  if (messagePollInterval) clearInterval(messagePollInterval);
+  loadMessages();
+  messagePollInterval = setInterval(loadMessages, 2000);
+}
+
+function stopMessagePolling() {
+  if (messagePollInterval) {
+    clearInterval(messagePollInterval);
+    messagePollInterval = null;
+  }
+}
+
+function loadMessages() {
+  if (!myId || !currentFriendId) return;
+  fetch(API_BASE + '/messages/' + encodeURIComponent(myId) + '/' + encodeURIComponent(currentFriendId))
+    .then(res => res.json())
+    .then(data => {
+      if (!data.messages || !data.messages.length) return;
+      const box = document.getElementById('chatMessages');
+      const empty = document.getElementById('emptyChat');
+      if (empty) empty.remove();
+      let hasNew = false;
+      data.messages.forEach(msg => {
+        if (knownMessageIds.has(msg.id)) return;
+        knownMessageIds.add(msg.id);
+        hasNew = true;
+        const div = document.createElement('div');
+        div.className = 'message ' + msg.direction;
+        div.innerHTML = escapeHtml(msg.text) + '<div class="message-time">' + escapeHtml(msg.time || '') + '</div>';
+        box.appendChild(div);
+      });
+      if (hasNew) box.scrollTop = box.scrollHeight;
+    })
+    .catch(() => {});
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('messageInput');
+  const text = input.value.trim();
+  if (!text || !isAccepted) return;
+  const btn = document.getElementById('sendMsgBtn');
+  btn.disabled = true;
+  input.disabled = true;
+
+  fetch(API_BASE + '/send_message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from_id: myId, to_id: currentFriendId, text })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.ok) {
+      const box = document.getElementById('chatMessages');
+      const empty = document.getElementById('emptyChat');
+      if (empty) empty.remove();
+      const div = document.createElement('div');
+      div.className = 'message sent';
+      div.innerHTML = escapeHtml(text) + '<div class="message-time">' + escapeHtml(data.time || '') + '</div>';
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+      if (data.message_id) knownMessageIds.add(data.message_id);
+      input.value = '';
+    } else {
+      alert('পাঠানো যায়নি');
+    }
+  })
+  .catch(() => alert('নেটওয়ার্ক সমস্যা'))
+  .finally(() => {
+    btn.disabled = false;
+    input.disabled = false;
+    input.focus();
+  });
+}
+
+function goHome() {
+  stopStatusPolling();
+  stopMessagePolling();
+  currentFriendId = '';
+  isAccepted = false;
+  knownMessageIds.clear();
+  document.getElementById('friendId').value = '';
+  document.getElementById('status').innerHTML = '';
+  showScreen('searchScreen');
+  loadProfileToUI();
+  loadNotifications();
+}
+
+/* ========== Notifications ========== */
+function startNotifPolling() {
+  if (notifPollInterval) clearInterval(notifPollInterval);
+  loadNotifications();
+  notifPollInterval = setInterval(loadNotifications, 5000);
+}
+
+function stopNotifPolling() {
+  if (notifPollInterval) {
+    clearInterval(notifPollInterval);
+    notifPollInterval = null;
+  }
+}
+
+function loadNotifications() {
+  if (!myId) return;
+
+  Promise.all([
+    fetch(API_BASE + '/notifications/' + encodeURIComponent(myId)).then(r => r.json()).catch(() => ({ notifications: [] })),
+    fetch(API_BASE + '/api/friend_requests/' + encodeURIComponent(myId)).then(r => r.json()).catch(() => ({ requests: [] })),
+    fetch(API_BASE + '/api/friends/' + encodeURIComponent(myId)).then(r => r.json()).catch(() => ({ count: 0 })),
+    fetch(API_BASE + '/api/incoming_chats/' + encodeURIComponent(myId)).then(r => r.json()).catch(() => ({ requests: [] }))
+  ]).then(results => {
+    const list = results[0].notifications || [];
+    const requests = results[1].requests || [];
+    const friendCount = results[2].count || 0;
+    const chatReqs = results[3].requests || [];
+
+    const fc = document.getElementById('friendCountBadge');
+    if (fc) fc.innerText = friendCount;
+
+    const unread = list.filter(n => !n.is_read).length + requests.length + chatReqs.length;
+    const badge = document.getElementById('notifBadge');
+    if (unread > 0) {
+      badge.style.display = 'flex';
+      badge.innerText = unread > 9 ? '9+' : unread;
+    } else {
+      badge.style.display = 'none';
+    }
+
+    if (document.getElementById('notifScreen').classList.contains('active')) {
+      renderNotifList(list, requests, chatReqs);
+    }
+  });
+}
+
+function openNotifications() {
+  showScreen('notifScreen');
+  loadNotifications();
+  setTimeout(() => {
+    if (!myId) return;
+    fetch(API_BASE + '/notifications/' + encodeURIComponent(myId) + '/read', { method: 'POST' })
+      .then(() => loadNotifications())
+      .catch(() => {});
+  }, 800);
+}
+
+function renderNotifList(list, requests, chatReqs) {
+  const box = document.getElementById('notifList');
+  let html = '';
+
+  if (chatReqs && chatReqs.length) {
+    chatReqs.forEach(req => {
+      html += '<div class="notif-item" style="border-left-color:#5b3fc4">' +
+        '<div class="msg">💬 <b>' + escapeHtml(req.from_name || req.from_id) + '</b> তোমার সাথে চ্যাট করতে চায়</div>' +
+        '<div class="time">ID: ' + escapeHtml(req.from_id) + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:10px">' +
+        '<button onclick="respondChat(\'' + escapeHtml(req.from_id) + '\',\'' + escapeHtml(req.to_id) + '\',\'accept\')" style="flex:1;padding:8px;border:none;border-radius:10px;background:#00a86b;color:white;font-weight:600;font-size:13px;cursor:pointer">✅ Done</button>' +
+        '<button onclick="respondChat(\'' + escapeHtml(req.from_id) + '\',\'' + escapeHtml(req.to_id) + '\',\'cancel\')" style="flex:1;padding:8px;border:none;border-radius:10px;background:#e74c3c;color:white;font-weight:600;font-size:13px;cursor:pointer">❌ Cancel</button>' +
+        '</div></div>';
+    });
+  }
+
+  if (requests && requests.length) {
+    requests.forEach(req => {
+      html += '<div class="notif-item" style="border-left-color:#e67e22">' +
+        '<div class="msg">👥 <b>' + escapeHtml(req.from_name || req.from_id) + '</b> তোমাকে Friend Request পাঠিয়েছে</div>' +
+        '<div class="time">ID: ' + escapeHtml(req.from_id) + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:10px">' +
+        '<button onclick="respondFriend(\'' + escapeHtml(req.id) + '\',\'accept\')" style="flex:1;padding:8px;border:none;border-radius:10px;background:#00a86b;color:white;font-weight:600;font-size:13px;cursor:pointer">✅ Done</button>' +
+        '<button onclick="respondFriend(\'' + escapeHtml(req.id) + '\',\'cancel\')" style="flex:1;padding:8px;border:none;border-radius:10px;background:#e74c3c;color:white;font-weight:600;font-size:13px;cursor:pointer">❌ Cancel</button>' +
+        '</div></div>';
+    });
+  }
+
+  if (list && list.length) {
+    list.forEach(n => {
+      html += '<div class="notif-item' + (n.is_read ? ' read' : '') + '">' +
+        '<div class="msg">' + escapeHtml(n.message) + '</div>' +
+        '<div class="time">' + escapeHtml(n.time || '') + '</div></div>';
+    });
+  }
+
+  box.innerHTML = html || '<div class="empty-notif">কোনো নোটিফিকেশন নেই</div>';
+}
+
+function respondChat(fromId, toId, action) {
+  fetch(API_BASE + '/api/chat_respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from_id: fromId, to_id: toId, action })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      if (action === 'accept') {
+        alert('✅ Chat Connected! এখন মেসেজ পাঠাতে পারো।');
+        currentFriendId = fromId;
+        isAccepted = true;
+        document.getElementById('chatUserName').innerText = fromId;
+        openChat();
+      } else {
+        alert('Request Cancelled');
+        loadNotifications();
+      }
+    } else {
+      alert(data.error || 'ব্যর্থ');
+    }
+  })
+  .catch(() => alert('নেটওয়ার্ক সমস্যা'));
+}
+
+function respondFriend(requestId, action) {
+  fetch(API_BASE + '/api/friend_respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ request_id: requestId, action })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      alert(action === 'accept' ? '✅ Friend হয়ে গেছে!' : '❌ Request Cancelled');
+      loadNotifications();
+    } else {
+      alert(data.error || 'ব্যর্থ');
+    }
+  })
+  .catch(() => alert('নেটওয়ার্ক সমস্যা'));
+}
+
+/* ========== Friend List ========== */
+function openFriendList() {
+  showScreen('friendListScreen');
+  if (!myId) return;
+  fetch(API_BASE + '/api/friends/' + encodeURIComponent(myId))
+    .then(r => r.json())
+    .then(data => {
+      const box = document.getElementById('friendListBody');
+      const friends = data.friends || [];
+      if (!friends.length) {
+        box.innerHTML = '<div class="empty-notif">কোনো Friend নেই<br><small style="color:#aaa">ID দিয়ে Search করে Request পাঠাও</small></div>';
+        return;
+      }
+      box.innerHTML = '<div style="margin-bottom:12px;color:#888;font-size:13px">মোট Friend: <b>' + friends.length + '</b></div>' +
+        friends.map(f => {
+          const initial = (f.name || f.id || '?').charAt(0).toUpperCase();
+          return '<div class="home-profile-card" style="margin-bottom:10px;cursor:default">' +
+            '<div class="home-profile-avatar">' + escapeHtml(initial) + '</div>' +
+            '<div class="home-profile-info"><div class="name">' + escapeHtml(f.name || f.id) + '</div>' +
+            '<div class="sub">ID: ' + escapeHtml(f.id) + '</div></div></div>';
+        }).join('');
+    })
+    .catch(() => {
+      document.getElementById('friendListBody').innerHTML = '<div class="empty-notif">লোড করা যায়নি</div>';
+    });
+}
+
+/* ========== Support ========== */
+function openSupport() {
+  document.getElementById('supportModal').style.display = 'flex';
+  document.getElementById('supportText').value = '';
+}
+
+function closeSupport() {
+  document.getElementById('supportModal').style.display = 'none';
+}
+
+function sendSupport() {
+  if (!currentUser) { alert('আগে Login করো'); return; }
+  const text = document.getElementById('supportText').value.trim();
+  if (!text) { alert('মেসেজ লিখো'); return; }
+
+  const btn = document.getElementById('supportSendBtn');
+  btn.disabled = true;
+  btn.innerText = 'Sending...';
+
+  fetch(API_BASE + '/api/support', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user_id: currentUser.id,
+      user_name: currentUser.name,
+      text
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      alert('✅ Support মেসেজ পাঠানো হয়েছে!');
+      closeSupport();
+    } else {
+      alert(data.error || 'পাঠানো যায়নি');
+    }
+  })
+  .catch(() => alert('সার্ভার কানেক্ট হয়নি'))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerText = 'Send';
+  });
+}
+
+/* ========== Init ========== */
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && !forceUpdateActive) {
+    checkForUpdate().then(needs => {
+      if (needs) showForceUpdateScreen(pendingUpdateInfo);
+    });
+  }
+});
+
+document.getElementById('friendId').addEventListener('keypress', e => { if (e.key === 'Enter') sendRequest(); });
+document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendChatMessage(); });
+document.getElementById('loginPass').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('regPass').addEventListener('keypress', e => { if (e.key === 'Enter') doRegister(); });
+
+setTimeout(async () => {
+  document.getElementById('splashScreen').classList.remove('active');
+
+  const needsUpdate = await checkForUpdate();
+  if (needsUpdate) {
+    showForceUpdateScreen(pendingUpdateInfo);
+    return;
+  }
+
+  const saved = localStorage.getItem('quicksms_current');
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      myId = currentUser.id;
+      goToHome();
+      startNotifPolling();
+    } catch (e) {
+      showScreen('loginScreen');
+    }
+  } else {
+    showScreen('loginScreen');
+  }
+}, 1500);
+</script>
+</body>
+</html>
